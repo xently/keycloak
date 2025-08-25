@@ -6,5 +6,6 @@ resources:
   - secrets.yaml
   - cluster-issuers.yaml
   - ingress.yaml
+  - certificate.yaml
 patches:
   - path: patch-resources.yaml
