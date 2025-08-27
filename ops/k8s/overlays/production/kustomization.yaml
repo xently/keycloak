@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
-  - secrets.yaml
+  - external-secrets.yaml
   - cluster-issuers.yaml
   - ingress.yaml
   - certificate.yaml
