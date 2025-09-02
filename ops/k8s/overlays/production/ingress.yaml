@@ -23,3 +23,29 @@ spec:
     - hosts:
         - "oauth.xently.co.ke"
       secretName: keycloak-tls-secret
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: keycloak
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: "ops.oauth.xently.co.ke"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - "ops.oauth.xently.co.ke"
+      secretName: grafana-tls-secret
