@@ -7,10 +7,6 @@ on:
         description: "Terraform command to run (e.g., plan, apply, destroy, validate, show, fmt, refresh, import, state ...)"
         required: true
         default: "plan"
-      tf_args:
-        description: "Additional arguments for the terraform command (e.g., -auto-approve, -var 'key=value')"
-        required: false
-        default: ""
       working_directory:
         description: "Directory containing Terraform configuration"
         required: true
@@ -82,18 +78,9 @@ jobs:
       - name: Terraform Command
         run: |
           set -euo pipefail
-          cmd=${{ inputs.tf_command }}
-          args=${{ inputs.tf_args }}
-          echo "> Running: terraform $cmd $args"
+          cmd=$(echo "${{ inputs.tf_command }}" | awk '{print $1}' | xargs)
           # Safety: if apply or destroy, ensure -auto-approve provided or prompt is allowed via args.
           if [ "$cmd" = "apply" ] || [ "$cmd" = "destroy" ]; then
             echo "Note: For non-interactive runs, include -auto-approve in tf_args."
           fi
-          terraform $cmd $args
-
-      - name: Show State (optional)
-        if: ${{ always() }}
-        run: |
-          set -euo pipefail
-          terraform version
-          terraform workspace show || true
+          terraform ${{ inputs.tf_command }}
