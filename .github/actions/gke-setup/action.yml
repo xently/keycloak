@@ -27,14 +27,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Authenticate to Google Cloud (Workload Identity Federation)
-      uses: google-github-actions/auth@v2
+    - name: Setup GCP auth (OIDC)
+      uses: ./.github/actions/gcloud-setup
       with:
         workload_identity_provider: ${{ inputs.workload_identity_provider }}
         service_account: ${{ inputs.service_account }}
-
-    - name: Setup gcloud SDK
-      uses: google-github-actions/setup-gcloud@v2
 
     - name: Get GKE Credentials
       uses: google-github-actions/get-gke-credentials@v2
