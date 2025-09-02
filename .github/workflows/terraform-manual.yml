@@ -66,12 +66,6 @@ jobs:
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-      - name: Setup GCP auth (OIDC)
-        uses: ./.github/actions/gcloud-setup
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
       - name: Terraform Init
         run: terraform init -input=false
 
