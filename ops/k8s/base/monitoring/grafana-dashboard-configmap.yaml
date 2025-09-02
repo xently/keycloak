@@ -27,7 +27,14 @@ data:
       "id": null,
       "panels": [
         {
-          "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+          "id": 100,
+          "title": "Keycloak",
+          "type": "row"
+        },
+        {
+          "gridPos": { "h": 8, "w": 6, "x": 0, "y": 1 },
           "id": 4,
           "title": "Uptime",
           "type": "stat",
@@ -46,7 +53,7 @@ data:
           "description": "Shows the uptime of the Keycloak process."
         },
         {
-          "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+          "gridPos": { "h": 8, "w": 6, "x": 6, "y": 1 },
           "id": 12,
           "title": "Active Sessions",
           "type": "gauge",
@@ -64,7 +71,7 @@ data:
           "description": "Total number of active user sessions across all realms."
         },
         {
-          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 1 },
           "id": 2,
           "title": "Request Rate",
           "type": "timeseries",
@@ -82,7 +89,7 @@ data:
           }
         },
         {
-          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 1 },
           "id": 6,
           "title": "Response Time P95",
           "type": "timeseries",
@@ -100,7 +107,7 @@ data:
           }
         },
         {
-          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
           "id": 8,
           "title": "JVM Memory Used",
           "type": "timeseries",
@@ -118,7 +125,61 @@ data:
           }
         },
         {
-          "gridPos": { "h": 9, "w": 24, "x": 0, "y": 24 },
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 },
+          "id": 101,
+          "title": "PostgreSQL",
+          "type": "row"
+        },
+        {
+          "gridPos": { "h": 4, "w": 4, "x": 0, "y": 18 },
+          "title": "Postgres Up",
+          "type": "stat",
+          "targets": [ { "expr": "max(up{job=\"kubernetes-services\", app=\"postgres-exporter\"})" } ],
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+        },
+        {
+          "gridPos": { "h": 8, "w": 8, "x": 4, "y": 18 },
+          "title": "PG Connections",
+          "type": "timeseries",
+          "targets": [ { "expr": "sum(pg_stat_activity_count{datname=\"authentication\"}) by (state)" } ]
+        },
+        {
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 18 },
+          "title": "Cache Hit Ratio",
+          "type": "stat",
+          "targets": [ { "expr": "avg(pg_stat_database_blks_hit{datname=\"authentication\"}) / (avg(pg_stat_database_blks_read{datname=\"authentication\"}) + avg(pg_stat_database_blks_hit{datname=\"authentication\"}))" } ],
+          "fieldConfig": { "defaults": { "unit": "percentunit" } }
+        },
+        {
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 18 },
+          "title": "TPS",
+          "type": "timeseries",
+          "targets": [ { "expr": "sum(rate(pg_stat_database_xact_commit{datname=\"authentication\"}[5m]) + rate(pg_stat_database_xact_rollback{datname=\"authentication\"}[5m]))" } ],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 22 },
+          "title": "Database Size",
+          "type": "stat",
+          "targets": [ { "expr": "sum(pg_database_size_bytes{datname=\"authentication\"})" } ],
+          "fieldConfig": { "defaults": { "unit": "bytes" } }
+        },
+        {
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 22 },
+          "title": "Locks",
+          "type": "timeseries",
+          "targets": [ { "expr": "sum(pg_locks_count{datname=\"authentication\"}) by (mode)" } ]
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 },
+          "id": 102,
+          "title": "Logs",
+          "type": "row"
+        },
+        {
+          "gridPos": { "h": 9, "w": 24, "x": 0, "y": 27 },
           "id": 14,
           "title": "Keycloak Logs",
           "type": "logs",
@@ -170,5 +231,5 @@ data:
       "timezone": "browser",
       "title": "Keycloak Overview",
       "uid": "keycloak-overview",
-      "version": 2
+      "version": 3
     }
