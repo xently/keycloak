@@ -1,0 +1,99 @@
+name: Terraform Manual Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      tf_command:
+        description: "Terraform command to run (e.g., plan, apply, destroy, validate, show, fmt, refresh, import, state ...)"
+        required: true
+        default: "plan"
+      tf_args:
+        description: "Additional arguments for the terraform command (e.g., -auto-approve, -var 'key=value')"
+        required: false
+        default: ""
+      working_directory:
+        description: "Directory containing Terraform configuration"
+        required: true
+        default: "ops/terraform"
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }}
+
+jobs:
+  permission-check:
+    name: Ensure actor is maintainer or admin
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check actor permission level on repo
+        id: perm
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN || github.token }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          owner_repo="$REPO"
+          actor="$ACTOR"
+          # Query the collaborator permission for the actor
+          resp=$(curl -sSf -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${owner_repo}/collaborators/${actor}/permission")
+          perm=$(echo "$resp" | jq -r '.permission')
+          echo "Actor: $actor, Permission: $perm"
+          if [ "$perm" = "admin" ] || [ "$perm" = "maintain" ]; then
+            echo "Authorized"
+          else
+            echo "Only repository admins or maintainers can run this workflow." >&2
+            exit 1
+          fi
+
+  terraform:
+    name: Run Terraform command
+    runs-on: ubuntu-24.04
+    needs:
+      - permission-check
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working_directory }}
+    env:
+      TF_IN_AUTOMATION: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Setup GCP auth (OIDC)
+        uses: ./.github/actions/gke-setup
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Command
+        run: |
+          set -euo pipefail
+          cmd=${{ inputs.tf_command }}
+          args=${{ inputs.tf_args }}
+          echo "> Running: terraform $cmd $args"
+          # Safety: if apply or destroy, ensure -auto-approve provided or prompt is allowed via args.
+          if [ "$cmd" = "apply" ] || [ "$cmd" = "destroy" ]; then
+            echo "Note: For non-interactive runs, include -auto-approve in tf_args."
+          fi
+          terraform $cmd $args
+
+      - name: Show State (optional)
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          terraform version
+          terraform workspace show || true
