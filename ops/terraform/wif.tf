@@ -1,7 +1,14 @@
 # --- Workload Identity Federation (Securely connect GitHub Actions to GCP) ---
 resource "google_iam_workload_identity_pool" "github" {
+  # Note: Workload Identity Pools are soft-deleted in GCP and cannot be recreated with the same ID for ~30 days.
+  # To prevent breaking re-provisioning flows after a destroy, we forbid destroying this resource via Terraform.
+  # If you truly need to delete the pool, remove it manually in GCP and also remove it from state explicitly.
   workload_identity_pool_id = "github-actions-pool-keycloak"
   display_name              = "GitHub Actions (Keycloak)"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "google_iam_workload_identity_pool_provider" "github_provider" {
@@ -16,6 +23,10 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
   }
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
