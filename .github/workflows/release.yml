@@ -139,10 +139,10 @@ jobs:
           kubectl -n ingress-nginx rollout status deploy/ingress-nginx-controller --timeout=300s
           # Wait for Service external IP
           echo "Waiting for ingress-nginx controller Service external IP..."
-          for i in $(seq 1 60); do
+          for i in $(seq 1 30); do
             EXTIP=$(kubectl -n ingress-nginx get svc ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}{.status.loadBalancer.ingress[0].hostname}')
             if [ -n "${EXTIP}" ]; then echo "Found external address: ${EXTIP}"; break; fi
-            echo "No external address yet (attempt $i/60); sleeping 5s..."; sleep 5;
+            echo "No external address yet (attempt $i/30); sleeping 5s..."; sleep 5;
           done
 
       - name: Install cert-manager (Helm)
@@ -168,11 +168,11 @@ jobs:
           kubectl -n cert-manager rollout status deploy/cert-manager-cainjector --timeout=300s
           # Ensure webhook Service has endpoints (EndpointSlice) and CA bundle injection completed
           echo "Waiting for cert-manager-webhook Service EndpointSlices..."
-          for i in $(seq 1 60); do
+          for i in $(seq 1 30); do
             if kubectl -n cert-manager get endpointslice -l kubernetes.io/service-name=cert-manager-webhook -o jsonpath='{range .items[*].endpoints[*]}{.addresses[0]}{" "}{end}' | grep -q '[^[:space:]]'; then
               echo "cert-manager-webhook EndpointSlices are ready"; break;
             fi
-            echo "No webhook EndpointSlices yet (attempt $i/60); sleeping 5s..."; sleep 5;
+            echo "No webhook EndpointSlices yet (attempt $i/30); sleeping 5s..."; sleep 5;
           done
           # Hard fail if EndpointSlices are still not present
           if ! kubectl -n cert-manager get endpointslice -l kubernetes.io/service-name=cert-manager-webhook -o jsonpath='{range .items[*].endpoints[*]}{.addresses[0]}{" "}{end}' | grep -q '[^[:space:]]'; then
@@ -182,12 +182,12 @@ jobs:
           fi
 
           echo "Waiting for cert-manager ValidatingWebhookConfiguration CA bundle injection..."
-          for i in $(seq 1 60); do
+          for i in $(seq 1 30); do
             CABUNDLE=$(kubectl get validatingwebhookconfigurations.admissionregistration.k8s.io cert-manager-webhook -o jsonpath='{.webhooks[0].clientConfig.caBundle}' || true)
             if [ -n "${CABUNDLE}" ]; then
               echo "cert-manager-webhook caBundle is present"; break;
             fi
-            echo "caBundle not injected yet (attempt $i/60); sleeping 5s..."; sleep 5;
+            echo "caBundle not injected yet (attempt $i/30); sleeping 5s..."; sleep 5;
           done
 
           # Final check: if caBundle is still missing, warn and continue (webhook failurePolicy=Ignore avoids blocking)
