@@ -158,6 +158,8 @@ jobs:
             --version ${CERT_MANAGER_VERSION} \
             --set installCRDs=true \
             --set webhook.failurePolicy=Ignore \
+            --set webhook.securePort=10250 \
+            --set webhook.hostNetwork=true \
             --set resources.requests.cpu=50m \
             --set resources.requests.memory=128Mi \
             --set resources.limits.cpu=300m \
