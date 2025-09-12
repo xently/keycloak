@@ -7,7 +7,7 @@ resource "google_iam_workload_identity_pool" "github" {
   display_name              = "GitHub Actions (Keycloak)"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false # need to be able to drop this at will, since this is a test setup.
   }
 }
 
@@ -26,7 +26,7 @@ resource "google_iam_workload_identity_pool_provider" "github_provider" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false # need to be able to drop this at will, since this is a test setup.
   }
 }
 
