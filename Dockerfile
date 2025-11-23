@@ -16,7 +16,7 @@ RUN /opt/keycloak/bin/kc.sh build
 FROM quay.io/keycloak/keycloak:$TAG
 LABEL org.opencontainers.image.source="https://github.com/xently/keycloak" \
       org.opencontainers.image.licenses="Apache-2.0" \
-      service="xently-oath2" \
+      service="xently-oauth2" \
       role="web"
 
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
