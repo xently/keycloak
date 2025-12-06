@@ -64,10 +64,8 @@ jobs:
           cache-to: type=gha,mode=max
 
   provision:
-    needs:
-      - docker
     runs-on: ubuntu-24.04
-    if: always() && (github.event_name != 'workflow_dispatch' || (github.event.inputs.confirm_release == 'RELEASE' && (needs.docker.result == 'success' || needs.docker.result == 'skipped')))
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_release == 'RELEASE')
     defaults:
       run:
         shell: bash
@@ -97,7 +95,7 @@ jobs:
     needs:
       - provision
     runs-on: ubuntu-24.04
-    if: always() && (github.event_name != 'workflow_dispatch' || (github.event.inputs.confirm_release == 'RELEASE' && (needs.docker.result == 'success' || needs.docker.result == 'skipped')))
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_release == 'RELEASE')
     defaults:
       run:
         shell: bash
