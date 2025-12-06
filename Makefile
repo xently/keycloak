@@ -1,6 +1,6 @@
 .PHONY: help build-images build-and-push-images k8s k8s-delete k8s-production k8s-production-delete
 
-VERSION ?= 26.4
+VERSION ?= 26.3.1
 
 help: ## Display this help message.
 	@echo "Please use \`make <target>\` where <target> is one of:"
@@ -26,7 +26,7 @@ release: ## Tag a new release and push to GitHub.
 re-release: drop-release release ## Delete a release and then tag and push the same release tag.
 
 build-images: ## Build Docker images.
-	docker image build -t ghcr.io/xently/keycloak:$(VERSION) .
+	docker image build --build-arg TAG=$(VERSION) --tag ghcr.io/xently/keycloak:$(VERSION) .
 
 build-and-push-images: build-images ## Build and push Docker images.
 	docker image push ghcr.io/xently/keycloak:$(VERSION)
