@@ -34,7 +34,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: keycloak
-          image: "ghcr.io/xently/keycloak:26.3.1"
+          image: "ghcr.io/xently/keycloak:26.4"
           args: ["start", "--optimized", "--proxy-headers", "xforwarded"]
           securityContext:
             runAsUser: 1000

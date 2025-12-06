@@ -14,10 +14,10 @@ update-hosts: ## Update hosts file.
 	fi
 
 build-images: ## Build Docker images.
-	docker image build -t ghcr.io/xently/keycloak:26.3.1 .
+	docker image build -t ghcr.io/xently/keycloak:26.4 .
 
 build-and-push-images: build-images ## Build and push Docker images.
-	docker image push ghcr.io/xently/keycloak:26.3.1
+	docker image push ghcr.io/xently/keycloak:26.4
 
 k8s: update-hosts ## Start kubernetes development cluster.
 	kubectl apply -k ./ops/k8s/overlays/development/
