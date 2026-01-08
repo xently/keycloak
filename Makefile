@@ -1,5 +1,7 @@
 .PHONY: help build-images build-and-push-images k8s k8s-delete k8s-production k8s-production-delete
 
+# Define a consistent name for your multi-arch builder
+BUILDER_NAME ?= xently
 VERSION ?= 26.3.1
 
 help: ## Display this help message.
@@ -25,11 +27,35 @@ release: ## Tag a new release and push to GitHub.
 
 re-release: drop-release release ## Delete a release and then tag and push the same release tag.
 
-build-images: ## Build Docker images.
-	docker image build --build-arg TAG=$(VERSION) --tag ghcr.io/xently/keycloak:$(VERSION) .
+commission-buildx: ## Commission the Docker buildx
+	@echo "\033[0;33mCheck if the builder already exists...\e[0m"
+	@if ! docker buildx inspect $(BUILDER_NAME) > /dev/null 2>&1; then\
+	  echo "\033[0;32mCreating new multi-arch builder: $(BUILDER_NAME)...\e[0m";\
+	  docker buildx create --name $(BUILDER_NAME) --use;\
+	else\
+	  echo "\033[0;32mUsing existing builder: $(BUILDER_NAME)\e[0m";\
+	  docker buildx use $(BUILDER_NAME);\
+	fi
+	@echo "\033[0;33mEnsure the builder is started...\e[0m"
+	docker buildx inspect --bootstrap > /dev/null 2>&1
 
-build-and-push-images: build-images ## Build and push Docker images.
-	docker image push ghcr.io/xently/keycloak:$(VERSION)
+decommission-buildx: ## Decommission the Docker buildx
+	docker buildx rm $(BUILDER_NAME)
+
+build-images: commission-buildx ## Build Docker images.
+	docker buildx build \
+		--build-arg TAG=$(VERSION) \
+		--platform linux/amd64,linux/arm64 \
+		--tag ghcr.io/xently/keycloak:$(VERSION) .
+	$(MAKE) decommission-buildx
+
+build-and-push-images: commission-buildx ## Build and push Docker images.
+	docker buildx build \
+		--build-arg TAG=$(VERSION) \
+		--platform linux/amd64,linux/arm64 \
+		--tag ghcr.io/xently/keycloak:$(VERSION) \
+		--push .
+	$(MAKE) decommission-buildx
 
 k8s: update-hosts ## Start kubernetes development cluster.
 	kubectl apply -k ./ops/k8s/overlays/development/
