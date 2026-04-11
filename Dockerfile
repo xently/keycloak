@@ -1,5 +1,5 @@
 # Ref: https://www.keycloak.org/server/containers#_writing_your_optimized_keycloak_containerfile
-ARG TAG=26.3.1
+ARG TAG=26.6.0
 FROM quay.io/keycloak/keycloak:$TAG AS builder
 
 ENV KC_HEALTH_ENABLED=true

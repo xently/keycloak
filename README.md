@@ -17,7 +17,7 @@ Audience: Advanced platform/devops engineers working with `kustomize`, `kubectl`
 ## Overview
 
 - Image registry/name: `ghcr.io/xently/keycloak`
-- Default Keycloak version TAG (ARG): `26.3.1`
+- Default Keycloak version TAG (ARG): `26.6.0`
 - Health endpoints exposed on management port 9000: `/health/started`, `/health/ready`, `/health/live`
 - Base uses a `StatefulSet` for Keycloak and a simple Postgres 17-alpine Deployment for persistence
 
@@ -139,7 +139,7 @@ Rollback path:
 ## Upgrading Keycloak
 
 - To use a different Keycloak version, build with `--build-arg TAG=<version>` and bump your image tag accordingly, e.g.:
-    - `docker build --build-arg TAG=26.3.1 -t ghcr.io/xently/keycloak:26.3.1 .`
+    - `docker build --build-arg TAG=26.6.0 -t ghcr.io/xently/keycloak:26.6.0 .`
     - Update references in manifests or pull the desired tag.
 
 ## License

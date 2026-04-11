@@ -2,7 +2,7 @@
 
 # Define a consistent name for your multi-arch builder
 BUILDER_NAME ?= xently
-VERSION ?= 26.3.1
+VERSION ?= 26.6.0
 
 help: ## Display this help message.
 	@echo "Please use \`make <target>\` where <target> is one of:"
